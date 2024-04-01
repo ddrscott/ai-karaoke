@@ -1,0 +1,20 @@
+.chat_history
+sa-*
+work/
+.env
+.venv/
+*.log
+results.jsonl
+prompts/
+wavs/
+tmp/
+spins/
+tmpdir*/
+*.wav
+# Mac OS files
+.DS_Store
+# Python stuff
+*.egg-info/
+.eggs/
+__pycache__/
+*.pyc
