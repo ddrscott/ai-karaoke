@@ -1,8 +1,10 @@
 FROM python:3.10-slim
 
-# Install ffmpeg, then clean up the apt cache in a single RUN command to keep the image size small
+ENV MODEL_PATH /model
+
+RUN mkdir -p /model
 RUN apt-get update && \
-    apt-get install -y ffmpeg && \
+    apt-get install -y ffmpeg libsndfile1 && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the working directory in the container
