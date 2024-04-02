@@ -11,7 +11,14 @@ app = FastAPI()
 async def create_karaoke(file: UploadFile = File(...)):
     try:
 
-        output_dir, base_name, ext = split_path(file.filename)
+        # Create a temporary directory to store the output files
+        output_dir = os.path.join(os.getcwd(), "output")
+
+        _, base_name, ext = split_path(file.filename)
+
+        # write the file to disk
+        with open(os.path.join(output_dir, file.filename), "wb") as f:
+            f.write(file.file.read())
 
         # Use Spleeter to separate vocals and instruments
         separator = Separator('spleeter:2stems')
