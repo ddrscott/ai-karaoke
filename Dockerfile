@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
 # Install ffmpeg, then clean up the apt cache in a single RUN command to keep the image size small
 RUN apt-get update && \
