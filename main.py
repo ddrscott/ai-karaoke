@@ -4,25 +4,29 @@ from spleeter.separator import Separator
 import os
 import subprocess
 from textwrap import dedent
+import logging
 
 app = FastAPI()
 
 @app.post("/mp3/")
 async def create_karaoke(file: UploadFile = File(...)):
     try:
-
         # Create a temporary directory to store the output files
         output_dir = os.path.join(os.getcwd(), "output")
 
+        os.makedirs(output_dir, exist_ok=True)
+
         _, base_name, ext = split_path(file.filename)
 
+        src_path = os.path.join(output_dir, file.filename)
+
         # write the file to disk
-        with open(os.path.join(output_dir, file.filename), "wb") as f:
-            f.write(file.file.read())
+        with open(src_path, "wb") as f:
+            f.write(await file.read())
 
         # Use Spleeter to separate vocals and instruments
         separator = Separator('spleeter:2stems')
-        separator.separate_to_file(file.filename, output_dir)
+        separator.separate_to_file(src_path, output_dir)
         # wait for things to finish
         separator.join()
 
@@ -47,13 +51,12 @@ async def create_karaoke(file: UploadFile = File(...)):
             # Iterate over the output lines
             for line in process.stdout:
                 print(line, end='')
-
-        return FileResponse(mp3_path)
+        return FileResponse(path=mp3_path, filename=base_name + ".mp3")
     except Exception as e:
+        logging.error(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 def split_path(path):
-  base_dir, filename = os.path.split(path)
-  base_name, ext = os.path.splitext(filename)
-  return base_dir, base_name, ext
-
+    base_dir, filename = os.path.split(path)
+    base_name, ext = os.path.splitext(filename)
+    return base_dir, base_name, ext
