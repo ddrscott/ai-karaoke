@@ -9,8 +9,15 @@ The vocal track is the moved to the left audio channel and the instruments the r
 ## Endpoints
 - `POST /mp3`
    + returns audio only
+   + Example use:
+
+       ```
+       curl -X POST 'http://localhost:8080/mp3/' \
+       -H 'Content-Type: multipart/form-data'    \
+       -F 'file=@sample.m4a;type=audio/x-m4a'    \
+       -o output.mp3
+       ```
 
 ## TODO
 - [ ] Lyrics will be sub titled.
 - [ ] Basic visualization will be added for fun.
-- [ ] MP4 will be returned in the request body.
