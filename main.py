@@ -8,6 +8,10 @@ import logging
 
 app = FastAPI()
 
+@app.get("/")
+async def read_root():
+    return FileResponse('public/index.html', media_type="text/html")
+
 @app.post("/mp3/")
 async def create_karaoke(file: UploadFile = File(...)):
     try:
@@ -51,7 +55,7 @@ async def create_karaoke(file: UploadFile = File(...)):
             # Iterate over the output lines
             for line in process.stdout:
                 print(line, end='')
-        return FileResponse(path=mp3_path, filename=base_name + ".mp3")
+        return FileResponse(path=mp3_path, filename=base_name + ".mp3", media_type="audio/mpeg")
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=500, detail=str(e))

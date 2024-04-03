@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio File Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="container mx-auto">
+        <div id="drop_zone" class="border-dashed border-4 border-gray-200 rounded-lg p-10 text-center cursor-pointer hover:bg-gray-50">
+            Drag and drop your audio here or click to select a file
+            <input type="file" id="fileInput" class="hidden" accept="audio/*">
+            <p id="fileName" class="text-gray-500 mt-2"></p> <!-- File name display -->
+        </div>
+        <button id="submitBtn" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" disabled>Upload</button>
+        <div id="spinner" class="hidden mt-4">
+            <p>Uploading...</p>
+        </div>
+        <div id="result" class="hidden mt-4">
+            <a id="downloadLink" class="text-blue-500" href="#">Download File</a>
+            <audio id="audioPlayer" controls class="mt-4"></audio>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const dropZone = document.getElementById('drop_zone');
+        const fileInput = document.getElementById('fileInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const spinner = document.getElementById('spinner');
+        const result = document.getElementById('result');
+        const downloadLink = document.getElementById('downloadLink');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const fileNameDisplay = document.getElementById('fileName');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+        });
+
+        dropZone.addEventListener('drop', (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                submitBtn.disabled = false;
+                fileNameDisplay.textContent = `File: ${files[0].name}`; // Update file name display on drop
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                submitBtn.disabled = false;
+                fileNameDisplay.textContent = `File: ${fileInput.files[0].name}`; // Update file name display on file selection
+            }
+        });
+
+        submitBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a file first.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            submitBtn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/mp3/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+
+                downloadLink.href = url;
+                downloadLink.download = 'converted.mp3';
+                audioPlayer.src = url;
+
+                result.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to convert the file.');
+            } finally {
+                spinner.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+    });
+    </script>
+</body>
+</html>
